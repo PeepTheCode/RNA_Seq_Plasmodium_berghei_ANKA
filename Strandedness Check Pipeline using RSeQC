@@ -1,0 +1,43 @@
+############ Strandedness Check Pipeline using RSeQC ###################
+
+# Create a fresh conda environment with a compatible Python version (RSeQC works best with Python ≤3.10):
+conda create -n rseqc_env python=3.10 -y
+conda activate rseqc_env
+
+# Install RSeQC using pip inside the environment:
+pip install rseqc
+
+# Alternatively, you can install via conda:
+conda install -c bioconda rseqc
+
+# Install the bedops toolkit (for gff2bed conversion):
+conda install -c bioconda bedops
+
+# Convert GTF to BED Format:
+gff2bed < PlasmoDB-68_PbergheiANKA.gtf > PlasmoDB-68_PbergheiANKA.bed
+
+# Run Strandedness Check - Use infer_experiment.py from RSeQC to infer strandedness for each STAR-aligned BAM file
+for bam in LS_*_Aligned.sortedByCoord.out.bam; do infer_experiment.py -i "$bam" -r /home/tundup/myAnalysis/BulkTranscriptomics/AN_LAB/REFERENCE/PlasmoDB-68_PbergheiANKA.bed > "${bam%.bam}_strand_report.txt"; done
+
+
+############# OUTPUT EXAMPLES ##############
+
+# This is PairEnd Data
+# Fraction of reads explained by "1++,1--,2+-,2-+": 0.01
+# Fraction of reads explained by "1+-,1-+,2++,2--": 0.97
+# Fraction of reads explained by others: 0.02
+
+# This is PairEnd Data
+# Fraction of reads failed to determine: 0.0008
+# Fraction of reads explained by "1++,1--,2+-,2-+": 0.5072
+# Fraction of reads explained by "1+-,1-+,2++,2--": 0.4920
+
+
+############### Interpretation ###############
+
+# If the majority of reads (e.g., ≥90%) fall into the 1+-,1-+,2++,2-- group, the library is stranded, second-strand (also called reverse-stranded).
+# If the majority of reads (e.g., ≥90%) fall into the 1++,1--,2+-,2-+ group, the library is stranded, first-strand (forward-stranded).
+# If both groups have similar fractions (e.g., ~50% each), the library is unstranded.
+
+
+
