@@ -1,0 +1,3 @@
+# Strandedness Check
+
+for bam in LS_*_Aligned.sortedByCoord.out.bam; do infer_experiment.py -i "$bam" -r /home/tundup/myAnalysis/BulkTranscriptomics/AN_LAB/REFERENCE/PlasmoDB-68_PbergheiANKA.bed > "${bam%.bam}_strand_report.txt"; done
